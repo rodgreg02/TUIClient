@@ -43,7 +43,7 @@ public class TerminalUserInterface extends Thread {
             while (!doneTyping) {
                 KeyStroke ks = terminal.readInput();
 
-                if (ks.getKeyType() != KeyType.Enter) {
+                if (ks.getKeyType() != KeyType.Enter && ks.getCharacter() != null) {
                     textGraphics.putString(amountOfChars, 4, ks.getCharacter().toString());
                     inputStringBuilder.append(ks.getCharacter());
                     amountOfChars++;
@@ -58,17 +58,17 @@ public class TerminalUserInterface extends Thread {
                     doneTyping = true;
                 }
             }
-            String string = inputStringBuilder.toString();
+            String string;
+            if (inputStringBuilder.isEmpty()) {
+                string = "Im fucking stupid";
+            } else {
+                string = inputStringBuilder.toString();
+            }
             printWriter.println("connect|" + string);
             textGraphics.putString(0, 6, "Your name is : " + string);
             terminal.flush();
-            try {
-                Thread.sleep(3000);
                 terminal.clearScreen();
                 terminal.flush();
-            } catch (InterruptedException e) {
-                System.out.println(e.getMessage());
-            }
             Thread readingThread = new Thread(this::startReading);
             Thread writingThread = new Thread(this::startWriting);
             readingThread.start();
@@ -84,8 +84,8 @@ public class TerminalUserInterface extends Thread {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             String message;
             while (true) {
-                textGraphics.putString(0,0,"Enter message: ");
-                textGraphics.drawLine(0,1,100,1,'_');
+                textGraphics.putString(0, 0, "Enter message: ");
+                textGraphics.drawLine(0, 1, 100, 1, '_');
                 while ((message = bufferedReader.readLine()) != null) {
                     String[] splitMessage = message.split("\\|");
                     if (splitMessage[0].equals("new_message")) {
@@ -123,20 +123,25 @@ public class TerminalUserInterface extends Thread {
                             leftRight--;
                             amountOfChars--;
                             terminal.flush();
-                        }else {
+                        } else {
                             textGraphics.putString(leftRight, 0, ks.getCharacter().toString());
                             inputStringBuilder.append(ks.getCharacter());
                             amountOfChars++;
                             terminal.flush();
                             leftRight++;
                         }
-                    }
-                     else if (ks.getKeyType() == KeyType.Enter) {
+                    } else if (ks.getKeyType() == KeyType.Enter) {
                         doneTyping = true;
                     }
                 }
-                String string = inputStringBuilder.toString();
-                inputStringBuilder.delete(0,amountOfChars);
+                String string;
+                if (inputStringBuilder.isEmpty()) {
+                    string = "Im fucking stupid";
+                } else {
+                    string = inputStringBuilder.toString();
+                }
+
+                inputStringBuilder.delete(0, amountOfChars);
                 printWriter.println("send_message|" + string);
             }
         } catch (IOException e) {
