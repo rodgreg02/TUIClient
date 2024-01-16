@@ -91,29 +91,27 @@ public class TerminalUserInterface extends Thread {
                 terminal.flush();
                 while ((message = bufferedReader.readLine()) != null) {
                     String[] splitMessage = message.split("\\|");
-                    if (splitMessage.length >= 4) {
                         if (splitMessage[0].equals("new_message") || splitMessage[0].equals("new_user")) {
                             String displayMessage = "";
                             if (splitMessage[0].equals("new_message")) {
                                 displayMessage = splitMessage[2] + " at " + splitMessage[1] + ":" + splitMessage[3];
-                            } else if (splitMessage[0].equals("new_user")) {
+                            }
+                            if (splitMessage[0].equals("new_user")) {
                                 displayMessage = splitMessage[1] + " joined at " + splitMessage[2];
                             }
-
                             if (verticalAxis < 21) {
                                 textGraphics.putString(0, verticalAxis, displayMessage);
                                 verticalAxis++;
                             } else {
                                 for (int i = 1; i < 21; i++) {
                                     for (int j = 0; j < 50; j++) {
-                                        textGraphics.setCharacter(j, i - 1, textGraphics.getCharacter(j, i));
+                                        textGraphics.setCharacter(j, i - 1, (textGraphics.getCharacter(j, i)));
                                     }
                                 }
-                                textGraphics.putString(0, 20, displayMessage);
+                                textGraphics.putString(0, 20, displayMessage + "                                                                      ");
                             }
 
                             terminal.flush();
-                        }
                     }
                 }
 
@@ -137,7 +135,7 @@ public class TerminalUserInterface extends Thread {
                     if (ks.getKeyType() != KeyType.Enter) {
                         if (ks.getKeyType() == KeyType.Backspace) {
                             inputStringBuilder.deleteCharAt(amountOfChars - 1);
-                            textGraphics.setCharacter(amountOfChars, 23, ' ');
+                            textGraphics.setCharacter(amountOfChars + 15 , 23, ' ');
                             leftRight--;
                             amountOfChars--;
                             terminal.flush();
@@ -148,8 +146,10 @@ public class TerminalUserInterface extends Thread {
                             terminal.flush();
                             leftRight++;
                         }
-                    } else if (ks.getKeyType() == KeyType.Enter) {
+                    } else{
                         doneTyping = true;
+                        textGraphics.putString(15,23,"                                                                     ");
+                        terminal.flush();
                     }
                 }
                 String string;
@@ -158,7 +158,6 @@ public class TerminalUserInterface extends Thread {
                 } else {
                     string = inputStringBuilder.toString();
                 }
-
                 inputStringBuilder.delete(0, amountOfChars);
                 printWriter.println("send_message|" + string);
             }
