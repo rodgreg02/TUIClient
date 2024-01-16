@@ -1,6 +1,7 @@
 package org.example;
 
 import com.googlecode.lanterna.SGR;
+import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.TextColor.ANSI;
 import com.googlecode.lanterna.graphics.TextGraphics;
@@ -21,7 +22,7 @@ public class TerminalUserInterface extends Thread {
     Socket clientSocket;
     Terminal terminal;
     TextGraphics textGraphics;
-    int verticalAxis = 3;
+    int verticalAxis = 21;
     private PrintWriter printWriter;
 
     public TerminalUserInterface(Socket socket) {
@@ -37,14 +38,14 @@ public class TerminalUserInterface extends Thread {
             textGraphics = terminal.newTextGraphics();
             textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
             textGraphics.setBackgroundColor(TextColor.ANSI.BLACK);
-            textGraphics.putString(0, 0, "Welcome to Mlack!");
-            textGraphics.putString(0, 2, "Enter your username:");
+            textGraphics.putString(0, 0, "Welcome to MSlack!");
+            textGraphics.putString(0, 1, "Enter your username:");
             int amountOfChars = 0;
             while (!doneTyping) {
                 KeyStroke ks = terminal.readInput();
 
                 if (ks.getKeyType() != KeyType.Enter && ks.getCharacter() != null) {
-                    textGraphics.putString(amountOfChars, 4, ks.getCharacter().toString());
+                    textGraphics.putString(amountOfChars, 2, ks.getCharacter().toString());
                     inputStringBuilder.append(ks.getCharacter());
                     amountOfChars++;
                     terminal.flush();
@@ -60,15 +61,14 @@ public class TerminalUserInterface extends Thread {
             }
             String string;
             if (inputStringBuilder.isEmpty()) {
-                string = "Im fucking stupid";
+                string = "Im stupid";
             } else {
                 string = inputStringBuilder.toString();
             }
             printWriter.println("connect|" + string);
-            textGraphics.putString(0, 6, "Your name is : " + string);
             terminal.flush();
-                terminal.clearScreen();
-                terminal.flush();
+            terminal.clearScreen();
+            terminal.flush();
             Thread readingThread = new Thread(this::startReading);
             Thread writingThread = new Thread(this::startWriting);
             readingThread.start();
@@ -84,22 +84,40 @@ public class TerminalUserInterface extends Thread {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             String message;
             while (true) {
-                textGraphics.putString(0, 0, "Enter message: ");
-                textGraphics.drawLine(0, 1, 100, 1, '_');
+
+                textGraphics.putString(0, 23, "Enter message: ");
+                textGraphics.drawLine(14, 23, 100, 23, ' ');
+                textGraphics.drawLine(0, 22, 100, 22, '_');
+                terminal.flush();
                 while ((message = bufferedReader.readLine()) != null) {
                     String[] splitMessage = message.split("\\|");
-                    if (splitMessage[0].equals("new_message")) {
-                        textGraphics.putString(0, verticalAxis, splitMessage[2] + " at " + splitMessage[1] + ":" + splitMessage[3]);
-                        checkScroll();
-                        verticalAxis++;
-                        terminal.flush();
-                    } else if (splitMessage[0].equals("new_user")) {
-                        textGraphics.putString(0, verticalAxis, splitMessage[1] + " joined at " + splitMessage[2]);
-                        checkScroll();
-                        verticalAxis++;
-                        terminal.flush();
+                    if (splitMessage.length >= 4) {
+                        if (splitMessage[0].equals("new_message") || splitMessage[0].equals("new_user")) {
+                            String displayMessage = "";
+                            if (splitMessage[0].equals("new_message")) {
+                                displayMessage = splitMessage[2] + " at " + splitMessage[1] + ":" + splitMessage[3];
+                            } else if (splitMessage[0].equals("new_user")) {
+                                displayMessage = splitMessage[1] + " joined at " + splitMessage[2];
+                            }
+
+                            if (verticalAxis < 21) {
+                                textGraphics.putString(0, verticalAxis, displayMessage);
+                                verticalAxis++;
+                            } else {
+                                for (int i = 1; i < 21; i++) {
+                                    for (int j = 0; j < 50; j++) {
+                                        textGraphics.setCharacter(j, i - 1, textGraphics.getCharacter(j, i));
+                                    }
+                                }
+                                textGraphics.putString(0, 20, displayMessage);
+                            }
+
+                            terminal.flush();
+                        }
                     }
                 }
+
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -119,12 +137,12 @@ public class TerminalUserInterface extends Thread {
                     if (ks.getKeyType() != KeyType.Enter) {
                         if (ks.getKeyType() == KeyType.Backspace) {
                             inputStringBuilder.deleteCharAt(amountOfChars - 1);
-                            textGraphics.setCharacter(amountOfChars, 0, ' ');
+                            textGraphics.setCharacter(amountOfChars, 23, ' ');
                             leftRight--;
                             amountOfChars--;
                             terminal.flush();
                         } else {
-                            textGraphics.putString(leftRight, 0, ks.getCharacter().toString());
+                            textGraphics.putString(leftRight, 23, ks.getCharacter().toString());
                             inputStringBuilder.append(ks.getCharacter());
                             amountOfChars++;
                             terminal.flush();
@@ -146,12 +164,6 @@ public class TerminalUserInterface extends Thread {
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
-        }
-    }
-
-    public void checkScroll() {
-        if (verticalAxis == 30) {
-            verticalAxis = 3;
         }
     }
 }
