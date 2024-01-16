@@ -18,7 +18,7 @@ public class Client extends Thread {
     @Override
     public void run() {
         try {
-            Socket clientSocket = new Socket("localhost", 8667);
+            Socket clientSocket = new Socket("192.168.160.204", 8667);
             TerminalUserInterface tui = new TerminalUserInterface(clientSocket);
             tui.start();
 
