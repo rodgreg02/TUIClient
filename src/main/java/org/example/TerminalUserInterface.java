@@ -45,17 +45,19 @@ public class TerminalUserInterface extends Thread {
                 KeyStroke ks = terminal.readInput();
 
                 if (ks.getKeyType() != KeyType.Enter && ks.getCharacter() != null) {
-                    textGraphics.putString(amountOfChars, 2, ks.getCharacter().toString());
-                    inputStringBuilder.append(ks.getCharacter());
-                    amountOfChars++;
-                    terminal.flush();
+                    if (ks.getKeyType() == KeyType.Backspace && amountOfChars != 0) {
+                        inputStringBuilder.deleteCharAt(amountOfChars - 1);
+                        textGraphics.setCharacter(amountOfChars, 2, ' ');
+                        amountOfChars--;
+                        terminal.flush();
+                    }else if(ks.getKeyType() != KeyType.Backspace){
+                        textGraphics.putString(amountOfChars, 2, ks.getCharacter().toString());
+                        inputStringBuilder.append(ks.getCharacter());
+                        amountOfChars++;
+                        terminal.flush();
+                    }
                 }
-                if (ks.getKeyType() == KeyType.Backspace) {
-                    inputStringBuilder.deleteCharAt(amountOfChars);
-                    textGraphics.setCharacter(amountOfChars, verticalAxis, ' ');
-                    amountOfChars--;
-                    terminal.flush();
-                } else if (ks.getKeyType() == KeyType.Enter) {
+                else{
                     doneTyping = true;
                 }
             }
@@ -133,13 +135,13 @@ public class TerminalUserInterface extends Thread {
                 while (!doneTyping) {
                     KeyStroke ks = terminal.readInput();
                     if (ks.getKeyType() != KeyType.Enter) {
-                        if (ks.getKeyType() == KeyType.Backspace) {
+                        if (ks.getKeyType() == KeyType.Backspace && amountOfChars != 0) {
                             inputStringBuilder.deleteCharAt(amountOfChars - 1);
-                            textGraphics.setCharacter(amountOfChars + 15 , 23, ' ');
+                            textGraphics.setCharacter(amountOfChars + 14 , 23, ' ');
                             leftRight--;
                             amountOfChars--;
                             terminal.flush();
-                        } else {
+                        } else if(ks.getKeyType() != KeyType.Backspace){
                             textGraphics.putString(leftRight, 23, ks.getCharacter().toString());
                             inputStringBuilder.append(ks.getCharacter());
                             amountOfChars++;
