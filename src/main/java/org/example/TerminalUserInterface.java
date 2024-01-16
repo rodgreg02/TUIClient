@@ -39,7 +39,7 @@ public class TerminalUserInterface extends Thread {
             textGraphics.setForegroundColor(TextColor.ANSI.WHITE);
             textGraphics.setBackgroundColor(TextColor.ANSI.BLACK);
             textGraphics.putString(0, 0, "Welcome to MSlack!");
-            textGraphics.putString(0, 1, "Enter your username:");
+            textGraphics.putString(0, 1, "Enter your username(<10 digits):");
             int amountOfChars = 0;
             while (!doneTyping) {
                 KeyStroke ks = terminal.readInput();
@@ -47,7 +47,7 @@ public class TerminalUserInterface extends Thread {
                 if (ks.getKeyType() != KeyType.Enter && ks.getCharacter() != null) {
                     if (ks.getKeyType() == KeyType.Backspace && amountOfChars != 0) {
                         inputStringBuilder.deleteCharAt(amountOfChars - 1);
-                        textGraphics.setCharacter(amountOfChars, 2, ' ');
+                        textGraphics.setCharacter(amountOfChars - 1, 2, ' ');
                         amountOfChars--;
                         terminal.flush();
                     }else if(ks.getKeyType() != KeyType.Backspace){
@@ -61,12 +61,12 @@ public class TerminalUserInterface extends Thread {
                     doneTyping = true;
                 }
             }
-            String string;
+            String string = "";
             if (inputStringBuilder.isEmpty()) {
                 string = "Im stupid";
-            } else {
+            } if(inputStringBuilder.length() < 10) {
                 string = inputStringBuilder.toString();
-            }
+            }else{string = "Im an idiot that cant follow basic rules!";}
             printWriter.println("connect|" + string);
             terminal.flush();
             terminal.clearScreen();
