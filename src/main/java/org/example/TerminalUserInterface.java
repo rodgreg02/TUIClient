@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.*;
 import java.net.*;
+import java.time.LocalTime;
 import java.util.Scanner;
 
 public class TerminalUserInterface extends Thread {
@@ -24,9 +25,12 @@ public class TerminalUserInterface extends Thread {
     TextGraphics textGraphics;
     int verticalAxis = 21;
     private PrintWriter printWriter;
+    FileManager fileManager;
+    String username;
 
     public TerminalUserInterface(Socket socket) {
         this.clientSocket = socket;
+        fileManager = new FileManager();
     }
 
     public void run() {
@@ -68,6 +72,8 @@ public class TerminalUserInterface extends Thread {
                 string = inputStringBuilder.toString();
             }
             printWriter.println("connect|" + string);
+            username = string;
+            fileManager.write(username + " said: "+string);
             terminal.flush();
             terminal.clearScreen();
             terminal.flush();
@@ -97,9 +103,11 @@ public class TerminalUserInterface extends Thread {
                             String displayMessage = "";
                             if (splitMessage[0].equals("new_message")) {
                                 displayMessage = splitMessage[2] + " at " + splitMessage[1] + ":" + splitMessage[3];
+                                fileManager.write(displayMessage);
                             }
                             if (splitMessage[0].equals("new_user")) {
                                 displayMessage = splitMessage[1] + " joined at " + splitMessage[2];
+                                fileManager.write(displayMessage);
                             }
                             if (verticalAxis < 21) {
                                 textGraphics.putString(0, verticalAxis, displayMessage);
@@ -162,6 +170,7 @@ public class TerminalUserInterface extends Thread {
                 }
                 inputStringBuilder.delete(0, amountOfChars);
                 printWriter.println("send_message|" + string);
+                fileManager.write("You said:  "+string + " at " + LocalTime.now());
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
