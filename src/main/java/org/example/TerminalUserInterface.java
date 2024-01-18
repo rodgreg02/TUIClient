@@ -19,7 +19,7 @@ import java.net.*;
 import java.time.LocalTime;
 import java.util.Scanner;
 
-public class TerminalUserInterface extends Thread {
+public class TerminalUserInterface {
     Socket clientSocket;
     Terminal terminal;
     TextGraphics textGraphics;
